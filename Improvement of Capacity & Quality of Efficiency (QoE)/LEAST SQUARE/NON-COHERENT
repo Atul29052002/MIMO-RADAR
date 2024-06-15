@@ -1,0 +1,61 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Parameters
+N = 1000  # Number of samples
+M = 4     # Number of transmit antennas
+N_r = 4   # Number of receive antennas
+K = 3     # Number of targets
+P = 10    # Transmit power
+SNR = 10  # Signal-to-noise ratio
+
+# Generate random target parameters
+theta = np.random.uniform(0, np.pi, K)
+phi = np.random.uniform(0, 2*np.pi, K)
+beta = np.random.exponential(1, K)
+
+# Transmit signal
+X = np.sqrt(P / M) * (np.random.randn(M, N) + 1j*np.random.randn(M, N))
+
+# Channel matrix
+H = np.sqrt(0.5) * (np.random.randn(N_r, M) + 1j*np.random.randn(N_r, M))
+
+# Received signal
+Y = np.dot(H, X)
+
+# Additive white Gaussian noise
+sigma2 = P / (10**(SNR/10))  # Noise variance
+W = np.sqrt(sigma2 / 2) * (np.random.randn(N_r, N) + 1j*np.random.randn(N_r, N))
+
+Y += W
+
+# Non-coherent detection using energy detection
+# Compute energy for each receive antenna
+energy = np.sum(np.abs(Y)**2, axis=0)
+
+# Threshold for detection
+threshold = np.mean(energy)
+
+# Detected targets
+detected_targets = np.where(energy > threshold)[0]
+
+# Plot transmission
+plt.figure(figsize=(10, 6))
+plt.subplot(2, 1, 1)
+plt.scatter(np.real(X), np.imag(X), label='Transmit Signal')
+plt.xlabel('Real')
+plt.ylabel('Imaginary')
+plt.title('Transmitted Signal')
+plt.legend()
+
+# Plot target detection
+plt.subplot(2, 1, 2)
+plt.scatter(np.real(Y[:, detected_targets]), np.imag(Y[:, detected_targets]), label='Detected Targets')
+plt.scatter(np.cos(theta) * np.sin(phi), np.sin(theta) * np.sin(phi), color='red', marker='x', label='True Target')
+plt.xlabel('Real')
+plt.ylabel('Imaginary')
+plt.title('Target Detection using Non-Coherent MIMO Radar')
+plt.legend()
+
+plt.tight_layout()
+plt.show()
