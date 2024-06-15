@@ -1,0 +1,77 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+def generate_coherent_mimo_radar_signal(num_transmit_antennas, num_receive_antennas, num_targets, num_samples):
+    # Generate random MIMO radar signal (for demonstration)
+    signal = np.random.randn(num_transmit_antennas, num_samples) + 1j * np.random.randn(num_transmit_antennas, num_samples)
+    
+    # Generate random target signal (for demonstration)
+    target_signal = np.zeros((num_targets, num_samples), dtype=np.complex128)
+    for i in range(num_targets):
+        target_signal[i] = np.random.randn(num_samples) + 1j * np.random.randn(num_samples)
+    
+    # Simulate received signals at multiple receive antennas with coherent processing
+    received_signal = np.zeros((num_receive_antennas, num_samples), dtype=np.complex128)
+    for i in range(num_receive_antennas):
+        # Simulate coherent processing by summing up the signals received at each antenna
+        received_signal[i] = np.sum(signal, axis=0) + np.sum(target_signal, axis=0) + np.random.randn(num_samples) * 0.05  # Adding noise for realism
+    
+    return received_signal, target_signal
+
+def calculate_amplitude_and_phase(signal):
+    # Calculate amplitude and phase
+    amplitude = np.abs(signal)
+    phase = np.angle(signal)
+    
+    return amplitude, phase
+
+def plot_mimo_radar_signal(signal, target_signal, num_receive_antennas, num_targets):
+    plt.figure(figsize=(12, 12))
+    colors = plt.cm.viridis(np.linspace(0, 1, num_receive_antennas + num_targets))
+    
+    plt.subplot(311)
+    for i in range(num_receive_antennas):
+        plt.plot(np.real(signal[i]), label=f'Receive Antenna {i+1} Real', color=colors[i])
+        plt.plot(np.imag(signal[i]), label=f'Receive Antenna {i+1} Imaginary', linestyle='--', color=colors[i])
+    for i in range(num_targets):
+        plt.plot(np.real(target_signal[i]), label=f'Target {i+1} Real', color=colors[num_receive_antennas + i])
+        plt.plot(np.imag(target_signal[i]), label=f'Target {i+1} Imaginary', linestyle='--', color=colors[num_receive_antennas + i])
+    plt.title('Received MIMO Radar Signal and Target Signal')
+    plt.xlabel('Sample')
+    plt.ylabel('Value')
+    plt.legend()
+
+    plt.subplot(312)
+    for i in range(num_receive_antennas):
+        amplitude, phase = calculate_amplitude_and_phase(signal[i])
+        plt.plot(amplitude, label=f'Receive Antenna {i+1} Amplitude', color=colors[i])
+        plt.plot(phase, label=f'Receive Antenna {i+1} Phase', linestyle='--', color=colors[i])
+    plt.title('Amplitude and Phase Modulation of Received Signal')
+    plt.xlabel('Sample')
+    plt.ylabel('Value')
+    plt.legend()
+
+    plt.subplot(313)
+    for i in range(num_targets):
+        amplitude, phase = calculate_amplitude_and_phase(target_signal[i])
+        plt.plot(amplitude, label=f'Target {i+1} Amplitude', color=colors[num_receive_antennas + i])
+        plt.plot(phase, label=f'Target {i+1} Phase', linestyle='--', color=colors[num_receive_antennas + i])
+    plt.title('Amplitude and Phase Modulation of Target Signal')
+    plt.xlabel('Sample')
+    plt.ylabel('Value')
+    plt.legend()
+
+    plt.tight_layout()
+    plt.show()
+
+# Parameters
+num_transmit_antennas = 4  # Assuming 2 transmit antennas for MIMO radar
+num_receive_antennas = 4  # Assuming 2 receive antennas for MIMO radar
+num_targets = 3
+num_samples = 100
+
+# Generate signals
+received_signal, target_signal = generate_coherent_mimo_radar_signal(num_transmit_antennas, num_receive_antennas, num_targets, num_samples)
+
+# Plot signals
+plot_mimo_radar_signal(received_signal, target_signal, num_receive_antennas, num_targets)
